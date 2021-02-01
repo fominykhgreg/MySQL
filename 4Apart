@@ -1,0 +1,128 @@
+DROP DATABASE IF EXISTS 4ApartmentsDatabase;
+CREATE DATABASE 4ApartmentsDatabase;
+USE 4ApartmentsDatabase;
+
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+	id SERIAL PRIMARY KEY, -- SERIAL = BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE
+    firstname VARCHAR(100),
+    lastname VARCHAR(100) COMMENT 'Фамилия', -- COMMENT на случай, если имя неочевидное
+    email VARCHAR(100) UNIQUE,
+    password_hash varchar(100),
+    phone BIGINT,
+    is_deleted bit default 0,
+    INDEX users_firstname_lastname_idx(firstname, lastname)
+);
+
+DROP TABLE IF EXISTS `profiles`;
+CREATE TABLE `profiles` (
+	user_id SERIAL PRIMARY KEY,
+    gender CHAR(1),
+    birthday DATE,
+	photo_id BIGINT UNSIGNED NULL,
+    created_at DATETIME DEFAULT NOW(),
+    hometown VARCHAR(100)
+    
+);
+
+
+
+ALTER TABLE `profiles` ADD CONSTRAINT fk_user_id
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    ON UPDATE CASCADE ON DELETE CASCADE;
+
+DROP TABLE IF EXISTS messages;
+CREATE TABLE messages (
+	id SERIAL PRIMARY KEY,
+	from_user_id BIGINT UNSIGNED NOT NULL,
+    to_user_id BIGINT UNSIGNED NOT NULL,
+    body TEXT,
+    created_at DATETIME DEFAULT NOW(), 
+
+    FOREIGN KEY (from_user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (to_user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+
+DROP TABLE IF EXISTS Apartments;
+CREATE TABLE Apartments(
+	id SERIAL PRIMARY KEY,
+    
+    user_id BIGINT UNSIGNED NOT NULL,
+  	body text,
+    rooms VARCHAR(10),
+    price VARCHAR(255),
+    adress VARCHAR(255),
+    created_at DATETIME DEFAULT NOW(),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+
+DROP TABLE IF EXISTS users_favorites;
+CREATE TABLE users_favorites(
+	user_id BIGINT UNSIGNED NOT NULL,
+	apartment_id BIGINT UNSIGNED NOT NULL,
+  
+	PRIMARY KEY (user_id, apartment_id), 
+    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS media_types;
+CREATE TABLE media_types(
+	id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    created_at DATETIME DEFAULT NOW(),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+   
+);
+
+DROP TABLE IF EXISTS media;
+CREATE TABLE media(
+	id SERIAL PRIMARY KEY,
+    media_type_id BIGINT UNSIGNED,
+    user_id BIGINT UNSIGNED NOT NULL,
+  	body text,
+    filename VARCHAR(255),
+    `size` INT,
+	metadata JSON,
+    created_at DATETIME DEFAULT NOW(),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (media_type_id) REFERENCES media_types(id) ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+
+
+
+DROP TABLE IF EXISTS `photos`;
+CREATE TABLE `photos` (
+	id SERIAL PRIMARY KEY,
+	`album_id` BIGINT unsigned NOT NULL,
+	`media_id` BIGINT unsigned NOT NULL
+
+	
+);
+
+
+
+
+
+DROP TABLE IF EXISTS comments;
+CREATE TABLE comments(
+	id SERIAL PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    media_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME DEFAULT NOW(),
+    body TEXT,
+
+   
+
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (media_id) REFERENCES media(id) ON UPDATE CASCADE ON DELETE CASCADE
+
+);
