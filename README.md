@@ -1,2 +1,2 @@
-# MySQL
-MySQL data files
+# SQL
+SQL data files
